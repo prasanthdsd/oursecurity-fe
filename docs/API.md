@@ -26,6 +26,8 @@ Base path `/api`, JSON bodies, `Authorization: Bearer <jwt>`. Errors come back a
 | Committee | `GET /users?role=`, `POST /users`, `DELETE /users/{id}` | committee |
 | | `GET /reports/summary` | committee |
 | Notices | `GET /notices`, `POST /notices` `{title,body}` (post: committee) | all |
+| Push | `POST /devices` `{token, platform: IOS \| ANDROID}` (Expo push token) | signed in |
+| | `POST /devices/unregister` `{token}` (on logout) | signed in |
 
 Visit status flow:
 
@@ -35,5 +37,7 @@ resident pre-approves ─► PRE_APPROVED ─(guard verifies code)─► CHECKED
 guard logs walk-in ─► PENDING_APPROVAL ─(resident approves)─► APPROVED ─(guard)─► CHECKED_IN ─► CHECKED_OUT
                               └─(resident denies)─► DENIED
 ```
+
+Pushes carry `data: {type, id}` with `type` one of `VISIT_REQUEST`, `VISIT_UPDATE`, `DELIVERY`, `ALERT`, `NOTICE`, and an Android `channelId` of `gate`, `alerts` or `default`.
 
 The backend also offers `GET /notifications` and `POST /notifications/{id}/read`; the app does not use them yet.
