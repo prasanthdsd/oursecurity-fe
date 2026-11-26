@@ -23,6 +23,7 @@ import { LoginScreen } from '../screens/shared/LoginScreen';
 import { NoticesScreen } from '../screens/shared/NoticesScreen';
 import { ProfileScreen } from '../screens/shared/ProfileScreen';
 import { RaiseAlertScreen } from '../screens/shared/RaiseAlertScreen';
+import { navigationRef, usePushNavigation } from '../notifications/usePushNavigation';
 import { colors } from '../theme';
 import type { RootStackParamList } from './types';
 
@@ -47,6 +48,7 @@ const TABS: Record<Role, TabDef[]> = {
     { name: 'Gate', title: 'Gate', icon: 'shield-checkmark-outline', component: GateScreen },
     { name: 'Deliveries', title: 'Deliveries', icon: 'cube-outline', component: GuardDeliveriesScreen },
     { name: 'Alerts', title: 'Alerts', icon: 'warning-outline', component: AlertsScreen },
+    { name: 'Notices', title: 'Notices', icon: 'megaphone-outline', component: NoticesScreen },
   ],
   COMMITTEE: [
     { name: 'Dashboard', title: 'Dashboard', icon: 'stats-chart-outline', component: DashboardScreen },
@@ -95,6 +97,7 @@ function RoleTabs({ role }: { role: Role }) {
 
 export function RootNavigator() {
   const { user, restoring } = useAuth();
+  usePushNavigation(user?.role);
 
   if (restoring) {
     return (
@@ -105,7 +108,7 @@ export function RootNavigator() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator>
         {!user ? (
           <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />

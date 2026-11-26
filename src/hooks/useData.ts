@@ -1,6 +1,7 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useRef, useState } from 'react';
 import { config } from '../config';
+import { onPushReceived } from '../notifications/push';
 
 /**
  * Loads data when the screen is focused, refreshes it every `config.pollMs` while focused,
@@ -31,9 +32,13 @@ export function useData<T>(loader: () => Promise<T>, poll = true) {
   useFocusEffect(
     useCallback(() => {
       load();
-      if (!poll) return;
+      const unsubscribe = onPushReceived(() => load());
+      if (!poll) return unsubscribe;
       const t = setInterval(load, config.pollMs);
-      return () => clearInterval(t);
+      return () => {
+        clearInterval(t);
+        unsubscribe();
+      };
     }, [load, poll]),
   );
 

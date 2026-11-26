@@ -2,6 +2,7 @@ import * as SecureStore from 'expo-secure-store';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Platform } from 'react-native';
 import { api, ApiError, setAuthToken, User } from '../api';
+import { devicePlatform, getPushToken } from '../notifications/push';
 
 const TOKEN_KEY = 'oursecurity.token';
 
@@ -21,6 +22,28 @@ interface AuthState {
 
 const AuthContext = createContext<AuthState | null>(null);
 
+let pushToken: string | null = null;
+
+// Best effort: a failure here must never block login.
+async function registerPush() {
+  try {
+    pushToken = await getPushToken();
+    if (pushToken) await api.registerDevice(pushToken, devicePlatform);
+  } catch (e) {
+    console.warn('Could not register for push notifications', e);
+  }
+}
+
+async function unregisterPush() {
+  if (!pushToken) return;
+  try {
+    await api.unregisterDevice(pushToken);
+  } catch {
+    // The backend also drops tokens Expo reports as no longer registered.
+  }
+  pushToken = null;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [restoring, setRestoring] = useState(true);
@@ -32,6 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (token) {
           setAuthToken(token);
           setUser(await api.me());
+          registerPush();
         }
       } catch (e) {
         if (e instanceof ApiError && e.status === 401) await tokenStore.clear();
@@ -47,9 +71,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAuthToken(res.token);
     await tokenStore.set(res.token);
     setUser(res.user);
+    registerPush();
   }, []);
 
   const logout = useCallback(async () => {
+    await unregisterPush(); // while the JWT is still valid
     setAuthToken(null);
     await tokenStore.clear();
     setUser(null);

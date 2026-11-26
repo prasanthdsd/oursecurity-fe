@@ -277,4 +277,8 @@ export const mockApi: Api = {
     notices.push(n);
     return delay(n);
   },
+
+  // Demo mode has no server to send pushes, so device registration is a no-op.
+  async registerDevice() {},
+  async unregisterDevice() {},
 };

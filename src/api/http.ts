@@ -79,4 +79,7 @@ export const httpApi: Api = {
 
   listNotices: () => request('GET', '/notices'),
   postNotice: (title, body) => request('POST', '/notices', { title, body }),
+
+  registerDevice: (token, platform) => request('POST', '/devices', { token, platform }),
+  unregisterDevice: (token) => request('POST', '/devices/unregister', { token }),
 };
