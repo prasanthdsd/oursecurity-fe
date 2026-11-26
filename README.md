@@ -79,8 +79,33 @@ See [docs/API.md](docs/API.md) for the endpoints used.
 Use [EAS Build](https://docs.expo.dev/build/introduction/): `npx eas build --platform all`.
 Bundle id / package name is `com.oursecurity.app` in `app.json`; change it before publishing.
 
-## Not done yet
+## Push notifications
 
-- Push notifications. Open screens refresh every 15 seconds instead, so a resident only sees a gate request while the app is open.
+The app registers the phone with the backend after login (`POST /api/devices`) and unregisters it on logout.
+The backend sends through Expo's push service, so it needs no Firebase or Apple keys of its own.
+
+| Event | Who gets it | Tapping opens |
+|---|---|---|
+| Walk-in visitor waiting | Residents of the flat | Resident: Home |
+| Visitor approved / denied / guest arrived | Guards, or the resident | Gate / Visitors |
+| Parcel logged, or resident's instruction | Residents of the flat, or guards | Home / Deliveries |
+| Emergency alert raised, acknowledged, resolved | Guards and committee, or the person who raised it | Alerts |
+| Notice posted | Everyone | Notices |
+
+Android gets three channels people can tune in system settings: **Emergency alerts** (max priority, loud,
+bypasses Do Not Disturb where allowed), **Visitors at the gate** (high), **Deliveries and notices** (normal).
+A push that arrives while the app is open refreshes the screen at once; screens still refresh every 15 seconds as a fallback.
+
+One-time setup (needed before pushes work):
+
+1. `npx eas init` links the app to an Expo project and writes `extra.eas.projectId` into `app.json`. Commit that.
+2. Android: add a Firebase project's FCM credentials with `npx eas credentials` (Expo's push service uses them to reach Android phones).
+   iOS: `npx eas credentials` creates the APNs key for you (needs an Apple Developer account).
+3. Install a development build on the phone: `npx eas build --profile development --platform android` (or `ios`).
+   **Expo Go cannot receive remote pushes on Android**, and simulators and the web preview never get them.
+
+Without a project id the app still works and just skips push registration.
+
+## Not done yet
 - Visitor photos, QR passes, and offline mode for the guard phone.
 - Self sign-up and password reset. The committee creates accounts.

@@ -25,7 +25,13 @@
     },
     "scheme": "oursecurity",
     "plugins": [
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "color": "#1F5FAD"
+        }
+      ]
     ]
   }
 }

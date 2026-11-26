@@ -118,6 +118,8 @@ export interface Summary {
   guards: number;
 }
 
+export type DevicePlatform = 'IOS' | 'ANDROID';
+
 /** Every call the app makes. Implemented by the HTTP client and by the demo mock. */
 export interface Api {
   login(phone: string, password: string): Promise<LoginResponse>;
@@ -150,5 +152,8 @@ export interface Api {
   summary(): Promise<Summary>;
 
   listNotices(): Promise<Notice[]>;
+
+  registerDevice(token: string, platform: DevicePlatform): Promise<void>;
+  unregisterDevice(token: string): Promise<void>;
   postNotice(title: string, body: string): Promise<Notice>;
 }

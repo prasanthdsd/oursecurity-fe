@@ -1,6 +1,6 @@
 export type RootStackParamList = {
   Login: undefined;
-  Tabs: undefined;
+  Tabs: { screen?: string } | undefined;
   Profile: undefined;
   PreApprove: undefined;
   WalkIn: undefined;
